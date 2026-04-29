@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Энергетический магнат</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a1628;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            color: #ecf0f1;
+        }
+        .splash-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0a1628 0%, #0d1f3c 50%, #0a1e3d 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            text-align: center;
+            padding: 20px;
+        }
+        .splash-title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #f1c40f;
+            text-shadow: 0 0 30px rgba(241,196,15,0.6);
+            margin-bottom: 5px;
+            font-family: 'Georgia', serif;
+            letter-spacing: 2px;
+        }
+        .splash-subtitle {
+            color: #f1c40f;
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+        .splash-btn {
+            background: rgba(241,196,15,0.1);
+            border: 2px solid #f1c40f;
+            color: #f1c40f;
+            padding: 15px 40px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 8px;
+            width: 260px;
+            transition: all 0.3s;
+        }
+        .splash-btn:hover {
+            background: #f1c40f;
+            color: #000;
+            box-shadow: 0 0 25px rgba(241,196,15,0.6);
+        }
+        .splash-btn.secondary {
+            background: transparent;
+            border: 2px solid #555;
+            color: #aaa;
+        }
+        .splash-btn.secondary:hover {
+            border-color: #f1c40f;
+            color: #f1c40f;
+            background: rgba(241,196,15,0.05);
+        }
+        .hidden-input { display: none; }
+        .container {
+            text-align: center;
+            padding: 20px;
+            max-width: 550px;
+            width: 100%;
+        }
+        .resources {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 5px;
+            flex-wrap: wrap;
+        }
+        .resource {
+            background: rgba(20, 40, 70, 0.9);
+            border-radius: 15px;
+            padding: 10px 18px;
+            border: 2px solid #555;
+            min-width: 100px;
+        }
+        .resource.bill-r {
+            border-color: #f1c40f;
+            box-shadow: 0 0 15px rgba(241, 196, 15, 0.3);
+        }
+        .resource.money-r {
+            border-color: #27ae60;
+            box-shadow: 0 0 15px rgba(39, 174, 96, 0.3);
+        }
+        .resource.rebirth-r {
+            border-color: #9b59b6;
+            box-shadow: 0 0 15px rgba(155, 89, 182, 0.3);
+        }
+        .resource-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #aaa;
+            margin-bottom: 2px;
+        }
+        .resource-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .bill-val { color: #f1c40f; }
+        .money-val { color: #27ae60; }
+        .rebirth-val { color: #9b59b6; }
+        .per-sec { font-size: 11px; color: #888; margin-top: 2px; }
+        .ach-btn {
+            background: #f1c40f;
+            color: #000;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        .ach-btn:hover {
+            box-shadow: 0 0 15px rgba(241,196,15,0.6);
+            transform: scale(1.05);
+        }
+        .ach-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .ach-modal.show { display: flex; }
+        .ach-content {
+            background: #0a1628;
+            border: 2px solid #f1c40f;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .ach-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #f1c40f;
+            margin-bottom: 15px;
+        }
+        .ach-close {
+            background: #c0392b;
+            color: #fff;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 15px auto 0;
+            display: block;
+        }
+        .ach-item {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 12px;
+            margin: 8px 0;
+            transition: all 0.3s;
+        }
+        .ach-item.unlocked { border: 2px solid; }
+        .ach-item.locked { border: 1px solid #333; opacity: 0.6; }
+        .ach-rebirth-bar { height: 8px; border-radius: 4px; margin: 5px 0; }
+        .ach-rebirth-bar.locked { background: #333; }
+        .ach-rebirth-bar.rare { background: #3498db; }
+        .ach-rebirth-bar.epic { background: #9b59b6; }
+        .ach-rebirth-bar.mythic { background: #e74c3c; }
+        .ach-rebirth-bar.legendary { background: #f1c40f; }
+        .ach-rebirth-bar.superlegendary { background: linear-gradient(to right, red, orange, yellow, green, blue, purple); }
+        .ach-rebirth-bar.supersecret { background: linear-gradient(to right, #f1c40f, #3498db, #f1c40f); }
+        .ach-header { display: flex; justify-content: space-between; align-items: center; }
+        .ach-rarity { font-weight: bold; font-size: 12px; padding: 2px 8px; border-radius: 5px; }
+        .ach-rarity.rare { background: #3498db; color: #fff; }
+        .ach-rarity.epic { background: #9b59b6; color: #fff; }
+        .ach-rarity.mythic { background: #e74c3c; color: #fff; }
+        .ach-rarity.legendary { background: #f1c40f; color: #000; }
+        .ach-rarity.superlegendary { background: linear-gradient(to right, red, orange, yellow, green, blue, purple); color: #fff; }
+        .ach-rarity.supersecret { background: linear-gradient(to right, #f1c40f, #3498db); color: #fff; }
+        .ach-condition { color: #ccc; font-size: 14px; margin: 5px 0; }
+        .ach-desc { font-size: 16px; font-weight: bold; margin: 5px 0; }
+        .ach-desc.locked { color: #666; }
+        .ach-desc.unlocked { color: #f1c40f; }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+            margin-bottom: 15px;
+            background: rgba(20, 40, 70, 0.9);
+            border-radius: 12px;
+            padding: 4px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px 5px;
+            border: none;
+            background: transparent;
+            color: #999;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+            white-space: nowrap;
+            min-width: 50px;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            touch-action: manipulation;
+        }
+        .tab.active {
+            background: #f1c40f;
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 0 12px rgba(241, 196, 15, 0.6);
+        }
+        .tab-content { animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .click-area {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #1a4a8a, #0d1f3c);
+            font-size: 75px;
+            border: 3px solid #f1c40f;
+            box-shadow: 0 0 35px rgba(241, 196, 15, 0.5), 0 0 0 5px rgba(30, 80, 160, 0.3);
+            margin: 10px auto;
+            transition: transform 0.1s;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            touch-action: manipulation;
+        }
+        .click-area:active { transform: scale(0.92); }
+        .click-area.pulse { animation: pulse 0.3s ease; }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .float-text {
+            position: absolute;
+            pointer-events: none;
+            color: #f1c40f;
+            font-weight: bold;
+            font-size: 22px;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 10;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.3); }
+        }
+        .spark {
+            position: absolute;
+            pointer-events: none;
+            width: 8px;
+            height: 8px;
+            background: #f1c40f;
+            border-radius: 50%;
+            animation: sparkBurst 0.6s ease-out forwards;
+            box-shadow: 0 0 8px #f1c40f;
+        }
+        @keyframes sparkBurst {
+            0% { opacity: 1; transform: translate(0,0) scale(1); }
+            100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+        }
+        .panel {
+            background: rgba(20, 40, 70, 0.8);
+            border: 1px solid #4a6fa5;
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        button, .upgrade-btn, .trade-btn, .sell-btn, .rebirth-btn, .file-btn {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .upgrade-btn, .trade-btn, .sell-btn, .rebirth-btn, .file-btn {
+            background: #1a3a5c;
+            border: 2px solid #4a6fa5;
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            margin: 5px;
+            min-width: 120px;
+        }
+        .upgrade-btn:hover:not(:disabled), .trade-btn:hover:not(:disabled), .sell-btn:hover:not(:disabled), .rebirth-btn:hover:not(:disabled), .file-btn:hover {
+            border-color: #f1c40f;
+            background: #1e4a7a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(241, 196, 15, 0.3);
+        }
+        .upgrade-btn:disabled, .trade-btn:disabled, .sell-btn:disabled, .rebirth-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .rebirth-btn { border-color: #9b59b6; background: #2c1a3e; }
+        .rebirth-btn:hover:not(:disabled) { border-color: #f1c40f; background: #3e2a4e; }
+        .file-btn { border-color: #3498db; background: #1a2a3e; min-width: 100px; font-size: 12px; }
+        .file-btn:hover { border-color: #f1c40f; background: #2a3a4e; }
+        .level-badge { background: #f1c40f; color: #000; border-radius: 8px; padding: 2px 8px; font-size: 11px; margin-left: 4px; font-weight: bold; }
+        .btn-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 8px 0; }
+        canvas {
+            width: 100%;
+            max-width: 400px;
+            height: 200px;
+            background: #0a1628;
+            border-radius: 10px;
+            margin: 10px auto;
+            display: block;
+            border: 1px solid #4a6fa5;
+        }
+        .price-info { display: flex; justify-content: space-between; align-items: center; font-size: 14px; margin: 5px 0; }
+        .reset-btn {
+            background: transparent;
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 15px;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            touch-action: manipulation;
+        }
+        .rebirth-req { color: #9b59b6; font-size: 14px; margin: 8px 0; }
+        .save-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+        .sell-all-info { color: #f1c40f; font-size: 14px; margin: 10px 0; }
+        .ach-bar-above {
+            display: inline-block;
+            height: 6px;
+            border-radius: 3px;
+            margin: 0 auto 5px;
+            width: 100px;
+        }
+        .ach-bar-above.locked { background: #333; }
+        .ach-bar-above.rare { background: #3498db; }
+        .ach-bar-above.epic { background: #9b59b6; }
+        .ach-bar-above.mythic { background: #e74c3c; }
+        .ach-bar-above.legendary { background: #f1c40f; }
+        .ach-bar-above.superlegendary { background: linear-gradient(to right, red, orange, yellow, green, blue, purple); }
+        .ach-bar-above.supersecret { background: linear-gradient(to right, #f1c40f, #3498db, #f1c40f); }
+        #splashPreview {
+            width: 100%;
+            max-width: 400px;
+            text-align: left;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-title">Comfoorta</div>
+        <div class="splash-subtitle">Энергетический магнат</div>
+        <div id="splashMainButtons">
+            <button class="splash-btn" id="splashLoadBtn">📤 Загрузить сохранение</button>
+            <button class="splash-btn secondary" id="splashContinueBtn">▶ Продолжить без сохранения</button>
+        </div>
+        <div id="splashPreview" style="display:none;">
+            <div style="background: rgba(20,40,70,0.9); border: 1px solid #f1c40f; border-radius: 15px; padding: 15px;">
+                <p style="color:#f1c40f; font-weight:bold; text-align:center; margin-bottom:10px;">📊 Предпросмотр сохранения</p>
+                <div id="previewContent"></div>
+                <div style="text-align:center; margin-top:15px;">
+                    <p style="color:#f1c40f; margin-bottom:10px;">Это ваш аккаунт?</p>
+                    <button class="splash-btn" id="splashConfirmYes" style="width:auto; padding:10px 30px; margin:5px;">✅ Да, загрузить</button>
+                    <button class="splash-btn secondary" id="splashConfirmNo" style="width:auto; padding:10px 30px; margin:5px;">❌ Нет, выбрать другой</button>
+                </div>
+            </div>
+        </div>
+        <input type="file" id="splashFileInput" class="hidden-input" accept=".json">
+    </div>
+    <div class="container" id="gameContainer" style="display:none;">
+        <div class="resources">
+            <div class="resource bill-r">
+                <div class="resource-label">🧾💸 Счета</div>
+                <div class="resource-value bill-val" id="billDisplay">0</div>
+                <div class="per-sec" id="billPerSec">0/сек</div>
+            </div>
+            <div class="resource money-r">
+                <div class="resource-label">💵 Доллары</div>
+                <div class="resource-value money-val" id="moneyDisplay">0</div>
+            </div>
+            <div class="resource rebirth-r">
+                <div class="resource-label">🔄 Перерождений</div>
+                <div class="resource-value rebirth-val" id="rebirthDisplay">0</div>
+                <div class="per-sec" style="color:#9b59b6;" id="rebirthBonus">+0%</div>
+            </div>
+        </div>
+        <button class="ach-btn" id="achBtn">🏆 Достижения</button>
+        <div class="tabs">
+            <button class="tab active" id="tabFactory">🏭 Электростанция</button>
+            <button class="tab" id="tabUpgrades">⚡️ Электричество</button>
+            <button class="tab" id="tabSell">💰 Продажа</button>
+            <button class="tab" id="tabCrypto">₿ Крипта</button>
+            <button class="tab" id="tabRebirth">🔄 Перерождение</button>
+        </div>
+        <div class="tab-content" id="factoryContent">
+            <div id="achBarAbove" class="ach-bar-above locked" style="width:100px;"></div>
+            <div class="click-area" id="clickArea">⚡️</div>
+            <p style="color:#f1c40f;margin-top:8px;">ЖМИ НА МОЛНИЮ → ЭЛЕКТРИЧЕСТВО!</p>
+        </div>
+        <div class="tab-content" id="upgradesContent" style="display:none;">
+            <div class="panel">
+                <p style="color:#27ae60; margin-bottom:10px;">💵 Покупается за доллары</p>
+                <button class="upgrade-btn" id="upg1" disabled>
+                    ⚡️ Регулятор <span class="level-badge" id="lvl1">0</span><br>
+                    <small>💵 $<span id="cost1">1600</span> | +2 🧾/сек</small>
+                </button>
+                <button class="upgrade-btn" id="upg2" disabled>
+                    ⚡️⛽️ Электростанция <span class="level-badge" id="lvl2">0</span><br>
+                    <small>💵 $<span id="cost2">8000</span> | +1 🧾 за клик</small>
+                </button>
+            </div>
+        </div>
+        <div class="tab-content" id="sellContent" style="display:none;">
+            <div class="panel">
+                <p style="margin-bottom:10px;">💵 Цена счёта: <b style="color:#27ae60;" id="billPriceDisplay">$100</b> / счёт</p>
+                <div class="sell-all-info"><p>У вас: <b id="sellBillAmount">0</b> 🧾</p></div>
+                <button class="sell-btn" id="sellBtn">💰 Продать ВСЁ</button>
+                <p style="color:#aaa; font-size:11px; margin-top:8px;">Продаёт все счета одним нажатием</p>
+                <p style="color:#27ae60; margin-top:15px;">💵 Улучшение за доллары</p>
+                <button class="upgrade-btn" id="sellUpg" disabled>
+                    📈 Рынок <span class="level-badge" id="sellUpgLvl">0</span><br>
+                    <small>💵 $<span id="sellUpgCost">30000</span> | +$1 к цене</small>
+                </button>
+            </div>
+        </div>
+        <div class="tab-content" id="cryptoContent" style="display:none;">
+            <div class="panel">
+                <div class="price-info">
+                    <span>₿ Биткоин</span>
+                    <span id="btcPriceDisplay" style="font-weight:bold;">$100 000</span>
+                </div>
+                <div class="price-info">
+                    <span>У вас:</span>
+                    <span id="btcBalanceDisplay">0 BTC</span>
+                </div>
+                <canvas id="btcChart"></canvas>
+                <div class="btn-row">
+                    <button class="trade-btn" id="buyBtcBtn">Купить 1 BTC</button>
+                    <button class="trade-btn" id="sellBtcBtn" disabled>Продать 1 BTC</button>
+                    <button class="trade-btn" id="buy100BtcBtn">Купить 100 BTC</button>
+                </div>
+                <button class="upgrade-btn" id="btcUpg" disabled>
+                    ⚡ Ферма <span class="level-badge" id="btcUpgLvl">0</span><br>
+                    <small>💵 $<span id="btcUpgCost">50000</span> | x2 к курсу</small>
+                </button>
+            </div>
+        </div>
+        <div class="tab-content" id="rebirthContent" style="display:none;">
+            <div class="panel">
+                <p style="color:#9b59b6; font-size:16px; font-weight:bold;">🔄 Перерождение</p>
+                <p style="color:#aaa; margin:10px 0;">Сбросить ВСЁ, но получить <b style="color:#f1c40f;">перманентный буст</b> к выработке!</p>
+                <div class="rebirth-req">
+                    <p>Требуется:</p>
+                    <p>🧾 <b id="rebirthBillReq">5 000 000</b> счетов <b>И</b></p>
+                    <p>💵 <b id="rebirthMoneyReq">10 000 000</b> долларов</p>
+                </div>
+                <p style="color:#9b59b6; margin:10px 0;">Текущий буст: <b id="rebirthBonusDisplay">+0%</b></p>
+                <p style="color:#aaa; margin:10px 0;">Следующий буст: <b id="nextRebirthBonus">+2%</b></p>
+                <button class="rebirth-btn" id="rebirthBtn" disabled>🔄 ПЕРЕРОДИТЬСЯ</button>
+                <p style="color:#888; font-size:11px; margin-top:8px;">1-е перерождение: +2%, затем +0.5% за каждое. Требования: +5M счетов, +10M денег каждое</p>
+            </div>
+        </div>
+        <div class="save-buttons">
+            <button class="file-btn" id="exportBtn">📥 Сохранить</button>
+            <button class="file-btn" id="importBtn">📤 Загрузить</button>
+        </div>
+        <input type="file" id="importFile" class="hidden-input" accept=".json">
+        <button class="reset-btn" id="resetBtn">🔄 Полный сброс</button>
+    </div>
+    <div class="ach-modal" id="achModal">
+        <div class="ach-content" id="achContent">
+            <div class="ach-title">🏆 Достижения</div>
+            <div id="achList"></div>
+            <button class="ach-close" id="achClose">Закрыть</button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) { e.preventDefault(); }
+        }, { passive: false });
+        document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+        document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
+        document.addEventListener('gestureend', function(e) { e.preventDefault(); });
+
+        const SECRET_KEY = "EnergyTycoon2024Secret!@#";
+
+        function encode(str) {
+            try { return btoa(unescape(encodeURIComponent(str + SECRET_KEY))); }
+            catch(e) { return btoa(str + SECRET_KEY); }
+        }
+        function decode(str) {
+            try {
+                const decoded = decodeURIComponent(escape(atob(str)));
+                if (!decoded.endsWith(SECRET_KEY)) return null;
+                return decoded.slice(0, -SECRET_KEY.length);
+            } catch(e) { return null; }
+        }
+
+        let G = {
+            bills: 0, money: 0, clickPower: 100, billsPerSec: 0,
+            upgrades: [0, 0], baseUpgCost: [1600, 8000],
+            sellUpgLevel: 0, sellUpgBaseCost: 30000, billPrice: 100,
+            btc: 0, btcPrice: 100000, btcUpgLevel: 0, btcUpgBaseCost: 50000, btcHistory: [100000],
+            rebirths: 0, rebirthBonus: 0,
+            noUpgradeRebirthCheck: false,
+            achievementsUnlocked: {
+                rebirth_1: false, rebirth_5: false, rebirth_10: false,
+                rebirth_20: false, rebirth_50: false, rebirth_100: false,
+                earn_1M_money: false, earn_1M_bills: false,
+                buy_100_btc_at_once: false, no_upgrade_rebirth: false,
+                earn_1B_no_rebirth: false
+            }
+        };
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('energyTycoonV7');
+            if (saved) {
+                const decoded = decode(saved);
+                if (decoded) {
+                    try {
+                        const s = JSON.parse(decoded);
+                        Object.assign(G, s);
+                        if (!G.achievementsUnlocked) {
+                            G.achievementsUnlocked = {
+                                rebirth_1: false, rebirth_5: false, rebirth_10: false,
+                                rebirth_20: false, rebirth_50: false, rebirth_100: false,
+                                earn_1M_money: false, earn_1M_bills: false,
+                                buy_100_btc_at_once: false, no_upgrade_rebirth: false,
+                                earn_1B_no_rebirth: false
+                            };
+                        }
+                        if (G.noUpgradeRebirthCheck === undefined) G.noUpgradeRebirthCheck = false;
+                        if (G.btcHistory.length === 0) G.btcHistory = [100000];
+                        checkRebirthAchievements();
+                        return true;
+                    } catch(e) {}
+                }
+            }
+            return false;
+        }
+
+        function checkRebirthAchievements() {
+            if (G.rebirths >= 1) G.achievementsUnlocked.rebirth_1 = true;
+            if (G.rebirths >= 5) G.achievementsUnlocked.rebirth_5 = true;
+            if (G.rebirths >= 10) G.achievementsUnlocked.rebirth_10 = true;
+            if (G.rebirths >= 20) G.achievementsUnlocked.rebirth_20 = true;
+            if (G.rebirths >= 50) G.achievementsUnlocked.rebirth_50 = true;
+            if (G.rebirths >= 100) G.achievementsUnlocked.rebirth_100 = true;
+        }
+
+        let gameStarted = false;
+        let pendingSaveData = null;
+
+        function approxMoney(n) {
+            if (n >= 1_000_000) return '~' + Math.round(n / 100_000) * 100_000 / 1_000_000 + 'M';
+            if (n >= 1_000) return '~' + Math.round(n / 100) * 100 / 1_000 + 'K';
+            return '~' + Math.round(n / 100) * 100;
+        }
+        function approxBtc(n) {
+            if (n >= 1_000_000) return '~' + Math.round(n / 1000) * 1000 / 1_000_000 + 'M';
+            if (n >= 1_000) return '~' + Math.round(n / 1000) * 1000 / 1_000 + 'K';
+            return '~' + Math.round(n / 1000) * 1000;
+        }
+        function renderMiniBar(rarity) {
+            const colors = {
+                'rare': '#3498db',
+                'epic': '#9b59b6',
+                'mythic': '#e74c3c',
+                'legendary': '#f1c40f',
+                'superlegendary': 'linear-gradient(to right, red, orange, yellow, green, blue, purple)',
+                'supersecret': 'linear-gradient(to right, #f1c40f, #3498db, #f1c40f)',
+                'locked': '#333'
+            };
+            const bg = colors[rarity] || '#333';
+            return `<span style="display:inline-block;width:20px;height:6px;border-radius:3px;background:${bg};margin-right:4px;"></span>`;
+        }
+
+        function showPreview(g) {
+            const ach = g.achievementsUnlocked || {};
+            const achList = [
+                { key: 'rebirth_1', name: '1 перерождение', rarity: 'rare' },
+                { key: 'rebirth_5', name: '5 перерождений', rarity: 'epic' },
+                { key: 'rebirth_10', name: '10 перерождений', rarity: 'mythic' },
+                { key: 'rebirth_20', name: '20 перерождений', rarity: 'legendary' },
+                { key: 'rebirth_50', name: '50 перерождений', rarity: 'superlegendary' },
+                { key: 'rebirth_100', name: '100 перерождений', rarity: 'supersecret' },
+                { key: 'earn_1M_money', name: '$1,000,000', rarity: 'rare' },
+                { key: 'earn_1M_bills', name: '1M счетов', rarity: 'rare' },
+                { key: 'buy_100_btc_at_once', name: '100 BTC за раз', rarity: 'rare' },
+                { key: 'no_upgrade_rebirth', name: 'Без улучшений', rarity: 'supersecret' },
+                { key: 'earn_1B_no_rebirth', name: '$1B на счету', rarity: 'superlegendary' }
+            ];
+            let achHTML = '';
+            achList.forEach(a => {
+                const unlocked = ach[a.key] === true;
+                achHTML += `<div style="display:flex;align-items:center;padding:3px 0;font-size:12px;${unlocked ? '' : 'opacity:0.5;'}">${unlocked ? renderMiniBar(a.rarity) : renderMiniBar('locked')}<span style="color:#ccc;">${a.name}</span>${unlocked ? '<span style="color:#27ae60;margin-left:5px;">✅</span>' : '<span style="color:#666;margin-left:5px;">⬛</span>'}</div>`;
+            });
+            const html = `
+                <p style="color:#aaa;font-size:12px;margin-bottom:5px;">🧾 Счета: <b style="color:#f1c40f;">${approxMoney(g.bills)}</b></p>
+                <p style="color:#aaa;font-size:12px;margin-bottom:5px;">💵 Деньги: <b style="color:#27ae60;">${approxMoney(g.money)} $</b></p>
+                <p style="color:#aaa;font-size:12px;margin-bottom:5px;">₿ Биткоинов: <b style="color:#f1c40f;">${g.btc || 0} BTC</b></p>
+                <p style="color:#aaa;font-size:12px;margin-bottom:5px;">💲 Курс BTC: <b style="color:#f1c40f;">${approxBtc(g.btcPrice || 100000)} $</b></p>
+                <p style="color:#aaa;font-size:12px;margin-bottom:5px;">🔄 Перерождений: <b style="color:#9b59b6;">${g.rebirths || 0}</b></p>
+                <p style="color:#f1c40f;font-weight:bold;margin-top:10px;margin-bottom:5px;">🏆 Достижения:</p>${achHTML}`;
+            document.getElementById('previewContent').innerHTML = html;
+            document.getElementById('splashMainButtons').style.display = 'none';
+            document.getElementById('splashPreview').style.display = 'block';
+        }
+        function hidePreview() {
+            document.getElementById('splashMainButtons').style.display = 'block';
+            document.getElementById('splashPreview').style.display = 'none';
+            pendingSaveData = null;
+            document.getElementById('splashFileInput').value = '';
+        }
+
+        document.getElementById('splashContinueBtn').addEventListener('click', function() {
+            loadFromLocalStorage();
+            checkRebirthAchievements();
+            startGame();
+        });
+        document.getElementById('splashLoadBtn').addEventListener('click', function() {
+            document.getElementById('splashFileInput').click();
+        });
+        document.getElementById('splashFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                try {
+                    const dec = decode(ev.target.result.trim());
+                    if (!dec) { alert('Файл повреждён или недействителен!'); return; }
+                    pendingSaveData = JSON.parse(dec);
+                    showPreview(pendingSaveData);
+                } catch(err) { alert('Ошибка загрузки файла!'); }
+            };
+            reader.readAsText(file);
+        });
+        document.getElementById('splashConfirmYes').addEventListener('click', function() {
+            if (!pendingSaveData) return;
+            Object.assign(G, pendingSaveData);
+            if (!G.achievementsUnlocked) {
+                G.achievementsUnlocked = {
+                    rebirth_1: false, rebirth_5: false, rebirth_10: false,
+                    rebirth_20: false, rebirth_50: false, rebirth_100: false,
+                    earn_1M_money: false, earn_1M_bills: false,
+                    buy_100_btc_at_once: false, no_upgrade_rebirth: false,
+                    earn_1B_no_rebirth: false
+                };
+            }
+            if (G.noUpgradeRebirthCheck === undefined) G.noUpgradeRebirthCheck = false;
+            if (G.btcHistory.length === 0) G.btcHistory = [100000];
+            checkRebirthAchievements();
+            hidePreview();
+            startGame();
+        });
+        document.getElementById('splashConfirmNo').addEventListener('click', function() {
+            hidePreview();
+            document.getElementById('splashFileInput').click();
+        });
+
+        function startGame() {
+            if (gameStarted) return;
+            gameStarted = true;
+            document.getElementById('splashScreen').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+            updateUI();
+            setTimeout(drawChart, 300);
+        }
+
+        const billD = document.getElementById('billDisplay');
+        const moneyD = document.getElementById('moneyDisplay');
+        const billPS = document.getElementById('billPerSec');
+        const clickArea = document.getElementById('clickArea');
+
+        function save() { localStorage.setItem('energyTycoonV7', encode(JSON.stringify(G))); }
+        function getUpgCost(i) { return Math.floor(G.baseUpgCost[i] * Math.pow(1.5, G.upgrades[i])); }
+        function getSellUpgCost() { return Math.floor(G.sellUpgBaseCost * Math.pow(1.7, G.sellUpgLevel)); }
+        function getBtcUpgCost() { return Math.floor(G.btcUpgBaseCost * Math.pow(1.8, G.btcUpgLevel)); }
+        function getRebirthBillReq() { return 5_000_000 + G.rebirths * 5_000_000; }
+        function getRebirthMoneyReq() { return 10_000_000 + G.rebirths * 10_000_000; }
+
+        function spawnSparks(el, count = 8) {
+            const rect = el.getBoundingClientRect();
+            const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
+            for (let i=0; i<count; i++) {
+                const d = document.createElement('div');
+                d.className = 'spark';
+                d.style.position = 'fixed';
+                d.style.left = cx + 'px';
+                d.style.top = cy + 'px';
+                const ang = Math.random()*Math.PI*2;
+                const dist = 35 + Math.random()*50;
+                d.style.setProperty('--dx', Math.cos(ang)*dist+'px');
+                d.style.setProperty('--dy', Math.sin(ang)*dist+'px');
+                document.body.appendChild(d);
+                setTimeout(() => d.remove(), 600);
+            }
+        }
+        function floatText(el, text) {
+            const t = document.createElement('div');
+            t.className = 'float-text';
+            t.textContent = text;
+            t.style.left = (Math.random()*40+20) + 'px';
+            t.style.top = (Math.random()*20) + 'px';
+            el.style.position = 'relative';
+            el.appendChild(t);
+            setTimeout(() => t.remove(), 1000);
+        }
+        function formatNum(n) {
+            if (n >= 1_000_000) return (n/1_000_000).toFixed(2) + 'M';
+            if (n >= 1_000) return (n/1_000).toFixed(1) + 'K';
+            return Math.floor(n).toString();
+        }
+        function getMaxRarityClass() {
+            if (G.achievementsUnlocked.rebirth_100 || G.achievementsUnlocked.no_upgrade_rebirth) return 'supersecret';
+            if (G.achievementsUnlocked.rebirth_50 || G.achievementsUnlocked.earn_1B_no_rebirth) return 'superlegendary';
+            if (G.achievementsUnlocked.rebirth_20) return 'legendary';
+            if (G.achievementsUnlocked.rebirth_10) return 'mythic';
+            if (G.achievementsUnlocked.rebirth_5) return 'epic';
+            if (G.achievementsUnlocked.rebirth_1 || G.achievementsUnlocked.earn_1M_money || G.achievementsUnlocked.earn_1M_bills || G.achievementsUnlocked.buy_100_btc_at_once) return 'rare';
+            return 'locked';
+        }
+
+        function updateUI() {
+            if (!gameStarted) return;
+            const bonus = 1 + G.rebirthBonus / 100;
+            billD.textContent = formatNum(G.bills);
+            moneyD.textContent = formatNum(G.money);
+            billPS.textContent = (G.billsPerSec * bonus).toFixed(1) + ' 🧾/сек';
+            document.getElementById('rebirthDisplay').textContent = G.rebirths;
+            document.getElementById('rebirthBonus').textContent = '+' + G.rebirthBonus.toFixed(2) + '%';
+            document.getElementById('sellBillAmount').textContent = formatNum(G.bills);
+            const bar = document.getElementById('achBarAbove');
+            bar.className = 'ach-bar-above ' + getMaxRarityClass();
+            if (G.money >= 1_000_000) G.achievementsUnlocked.earn_1M_money = true;
+            if (G.bills >= 1_000_000) G.achievementsUnlocked.earn_1M_bills = true;
+            if (G.money >= 1_000_000_000) G.achievementsUnlocked.earn_1B_no_rebirth = true;
+            checkRebirthAchievements();
+            for (let i=0; i<2; i++) {
+                const cost = getUpgCost(i);
+                document.getElementById('cost'+(i+1)).textContent = cost;
+                document.getElementById('lvl'+(i+1)).textContent = G.upgrades[i];
+                document.getElementById('upg'+(i+1)).disabled = G.money < cost;
+            }
+            const currentPrice = G.billPrice + G.sellUpgLevel;
+            document.getElementById('billPriceDisplay').textContent = '$' + currentPrice;
+            const sCost = getSellUpgCost();
+            document.getElementById('sellUpgCost').textContent = sCost;
+            document.getElementById('sellUpgLvl').textContent = G.sellUpgLevel;
+            document.getElementById('sellUpg').disabled = G.money < sCost;
+            document.getElementById('btcPriceDisplay').textContent = '$' + Math.floor(G.btcPrice);
+            document.getElementById('btcBalanceDisplay').textContent = G.btc + ' BTC';
+            document.getElementById('buyBtcBtn').disabled = G.money < G.btcPrice;
+            document.getElementById('sellBtcBtn').disabled = G.btc < 1;
+            document.getElementById('buy100BtcBtn').disabled = G.money < G.btcPrice * 100;
+            const bCost = getBtcUpgCost();
+            document.getElementById('btcUpgCost').textContent = bCost;
+            document.getElementById('btcUpgLvl').textContent = G.btcUpgLevel;
+            document.getElementById('btcUpg').disabled = G.money < bCost;
+            const bReq = getRebirthBillReq(), mReq = getRebirthMoneyReq();
+            document.getElementById('rebirthBillReq').textContent = formatNum(bReq);
+            document.getElementById('rebirthMoneyReq').textContent = formatNum(mReq);
+            document.getElementById('rebirthBonusDisplay').textContent = '+' + G.rebirthBonus.toFixed(2) + '%';
+            document.getElementById('nextRebirthBonus').textContent = '+' + (G.rebirths === 0 ? 2 : G.rebirthBonus + 0.5).toFixed(2) + '%';
+            document.getElementById('rebirthBtn').disabled = G.bills < bReq || G.money < mReq;
+            save();
+        }
+
+        const achievements = [
+            { id: 'rebirth_1', condition: '1 перерождение', desc: '«Я сделал хотя бы 1!»', rarity: 'rare', rarityName: 'РЕДКИЙ' },
+            { id: 'rebirth_5', condition: '5 перерождений', desc: '«Бро, ты кайф мэн!»', rarity: 'epic', rarityName: 'ЭПИЧЕСКИЙ' },
+            { id: 'rebirth_10', condition: '10 перерождений', desc: '«КАК?!?»', rarity: 'mythic', rarityName: 'МИФИЧЕСКИЙ' },
+            { id: 'rebirth_20', condition: '20 перерождений', desc: '«ТИКИ МЭН ТОЧНО!»', rarity: 'legendary', rarityName: 'ЛЕГЕНДАРНЫЙ' },
+            { id: 'rebirth_50', condition: '50 перерождений', desc: '«БРО ТЫ СТИКИ МЭН»', rarity: 'superlegendary', rarityName: 'СУПЕР ЛЕГЕНДАРНЫЙ' },
+            { id: 'rebirth_100', condition: '100 перерождений', desc: '«Районный прокурор, но не 67»', rarity: 'supersecret', rarityName: 'СУПЕР СЕКРЕТНЫЙ' },
+            { id: 'earn_1M_money', condition: 'Заработать $1,000,000', desc: '«Ничего сложного!»', rarity: 'rare', rarityName: 'РЕДКИЙ' },
+            { id: 'earn_1M_bills', condition: 'Заработать 1,000,000 счетов', desc: '«Бро, это сложно!»', rarity: 'rare', rarityName: 'РЕДКИЙ' },
+            { id: 'buy_100_btc_at_once', condition: 'Купить 100 биткоинов за 1 раз', desc: '«Лос биткоина»', rarity: 'rare', rarityName: 'РЕДКИЙ' },
+            { id: 'no_upgrade_rebirth', condition: 'Пройти перерождение без улучшений', desc: '«БРАХ!»', rarity: 'supersecret', rarityName: 'СУПЕР СЕКРЕТНЫЙ' },
+            { id: 'earn_1B_no_rebirth', condition: 'Заработать $1,000,000,000', desc: '«Детдомовец»', rarity: 'superlegendary', rarityName: 'СУПЕР ЛЕГЕНДАРНЫЙ' }
+        ];
+
+        function renderAchievements() {
+            const list = document.getElementById('achList');
+            list.innerHTML = '';
+            achievements.forEach(a => {
+                const unlocked = G.achievementsUnlocked[a.id];
+                const div = document.createElement('div');
+                div.className = 'ach-item ' + (unlocked ? 'unlocked ' + a.rarity : 'locked');
+                const barClass = unlocked ? a.rarity : 'locked';
+                div.innerHTML = `<div class="ach-rebirth-bar ${barClass}"></div><div class="ach-header"><span class="ach-rarity ${unlocked ? a.rarity : ''}">${unlocked ? a.rarityName : '???'}</span></div><div class="ach-condition">${a.condition}</div><div class="ach-desc ${unlocked ? 'unlocked' : 'locked'}">${unlocked ? a.desc : '«?»'}</div>`;
+                list.appendChild(div);
+            });
+        }
+
+        document.getElementById('achBtn').addEventListener('click', () => { renderAchievements(); document.getElementById('achModal').classList.add('show'); });
+        document.getElementById('achClose').addEventListener('click', () => { document.getElementById('achModal').classList.remove('show'); });
+        document.getElementById('achModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+
+        function drawChart() {
+            const canvas = document.getElementById('btcChart');
+            if (!canvas || G.btcHistory.length < 2) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.offsetWidth;
+            const h = canvas.height = canvas.offsetHeight;
+            const data = G.btcHistory;
+            const min = Math.min(...data) * 0.95, max = Math.max(...data) * 1.05, range = max - min || 1;
+            ctx.clearRect(0,0,w,h);
+            ctx.strokeStyle = '#333'; ctx.lineWidth = 0.5;
+            for (let i=0; i<=4; i++) { const y = (h/4)*i; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+            for (let i=1; i<data.length; i++) {
+                const x1 = ((i-1)/(data.length-1))*w, x2 = (i/(data.length-1))*w;
+                const y1 = h-((data[i-1]-min)/range)*h, y2 = h-((data[i]-min)/range)*h;
+                ctx.beginPath();
+                ctx.strokeStyle = data[i] >= data[i-1] ? '#27ae60' : '#e74c3c';
+                ctx.lineWidth = 2.5;
+                ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+            }
+            ctx.fillStyle = '#f1c40f'; ctx.beginPath();
+            ctx.arc(w-2, h-((data[data.length-1]-min)/range)*h, 4, 0, Math.PI*2); ctx.fill();
+        }
+
+        function handleTap(el, fn) {
+            el.addEventListener('click', fn);
+            el.addEventListener('touchstart', function(e) { e.preventDefault(); fn(); });
+        }
+
+        handleTap(clickArea, function() {
+            const earned = G.clickPower * (1 + G.rebirthBonus/100);
+            G.bills += earned;
+            clickArea.classList.remove('pulse');
+            void clickArea.offsetWidth;
+            clickArea.classList.add('pulse');
+            floatText(clickArea, '+' + earned.toFixed(1) + '🧾');
+            spawnSparks(clickArea, 8);
+            updateUI();
+        });
+
+        function buyUpg(i) {
+            const cost = getUpgCost(i);
+            if (G.money < cost) return;
+            G.money -= cost; G.upgrades[i]++;
+            G.noUpgradeRebirthCheck = true;
+            if (i===0) G.billsPerSec += 2;
+            if (i===1) G.clickPower += 1;
+            spawnSparks(document.getElementById('upg'+(i+1)), 8);
+            updateUI();
+        }
+        handleTap(document.getElementById('upg1'), function(){ buyUpg(0); });
+        handleTap(document.getElementById('upg2'), function(){ buyUpg(1); });
+        handleTap(document.getElementById('sellBtn'), function() {
+            if (G.bills <= 0) { alert('Нет счетов для продажи!'); return; }
+            const amount = Math.floor(G.bills);
+            const price = G.billPrice + G.sellUpgLevel;
+            G.money += amount * price;
+            G.bills = 0;
+            updateUI();
+        });
+        handleTap(document.getElementById('sellUpg'), function() {
+            const cost = getSellUpgCost();
+            if (G.money < cost) return;
+            G.money -= cost; G.sellUpgLevel++;
+            G.noUpgradeRebirthCheck = true;
+            spawnSparks(document.getElementById('sellUpg'), 8);
+            updateUI();
+        });
+
+        function buyBtc(amount) {
+            const cost = G.btcPrice * amount;
+            if (G.money < cost) { alert('Не хватает долларов!'); return; }
+            G.money -= cost;
+            G.btc += amount;
+            if (amount >= 100) G.achievementsUnlocked.buy_100_btc_at_once = true;
+            updateUI();
+        }
+        handleTap(document.getElementById('buyBtcBtn'), function(){ buyBtc(1); });
+        handleTap(document.getElementById('buy100BtcBtn'), function(){ buyBtc(100); });
+        handleTap(document.getElementById('sellBtcBtn'), function() {
+            if (G.btc < 1) { alert('Нет биткоинов!'); return; }
+            G.money += G.btcPrice; G.btc--;
+            updateUI();
+        });
+        handleTap(document.getElementById('btcUpg'), function() {
+            const cost = getBtcUpgCost();
+            if (G.money < cost) return;
+            G.money -= cost; G.btcUpgLevel++;
+            G.noUpgradeRebirthCheck = true;
+            spawnSparks(document.getElementById('btcUpg'), 8);
+            updateUI();
+        });
+        handleTap(document.getElementById('rebirthBtn'), function() {
+            const bReq = getRebirthBillReq(), mReq = getRebirthMoneyReq();
+            if (G.bills < bReq || G.money < mReq) return;
+            if (!confirm('Сбросить ВСЁ ради перманентного буста?')) return;
+            if (!G.noUpgradeRebirthCheck) {
+                G.achievementsUnlocked.no_upgrade_rebirth = true;
+            }
+            G.rebirths++;
+            G.rebirthBonus = G.rebirths === 1 ? 2 : G.rebirthBonus + 0.5;
+            G.bills=0; G.money=0; G.clickPower=100; G.billsPerSec=0;
+            G.upgrades=[0,0]; G.sellUpgLevel=0; G.btc=0; G.btcPrice=100000; G.btcUpgLevel=0; G.btcHistory=[100000];
+            G.noUpgradeRebirthCheck = false;
+            checkRebirthAchievements();
+            updateUI(); drawChart();
+        });
+        handleTap(document.getElementById('exportBtn'), function() {
+            const blob = new Blob([encode(JSON.stringify(G))], {type:'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'energy_tycoon_save.json';
+            a.click();
+        });
+        document.getElementById('importBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('importFile').click();
+        });
+        document.getElementById('importBtn').addEventListener('touchend', function(e) {
+            e.preventDefault();
+            document.getElementById('importFile').click();
+        });
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                try {
+                    const dec = decode(ev.target.result.trim());
+                    if (!dec) { alert('Файл повреждён!'); return; }
+                    Object.assign(G, JSON.parse(dec));
+                    if (!G.achievementsUnlocked) {
+                        G.achievementsUnlocked = {
+                            rebirth_1: false, rebirth_5: false, rebirth_10: false,
+                            rebirth_20: false, rebirth_50: false, rebirth_100: false,
+                            earn_1M_money: false, earn_1M_bills: false,
+                            buy_100_btc_at_once: false, no_upgrade_rebirth: false,
+                            earn_1B_no_rebirth: false
+                        };
+                    }
+                    if (G.noUpgradeRebirthCheck === undefined) G.noUpgradeRebirthCheck = false;
+                    if (G.btcHistory.length===0) G.btcHistory=[100000];
+                    checkRebirthAchievements();
+                    updateUI(); drawChart();
+                    alert('Прогресс восстановлен!');
+                } catch(err) { alert('Ошибка загрузки!'); }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        });
+
+        function updateBtcPrice() {
+            const target = 100000 * Math.pow(2, G.btcUpgLevel);
+            const diff = target - G.btcPrice;
+            G.btcPrice += diff*0.015 + (Math.random()-0.5)*0.03*target;
+            if (G.btcPrice<1000) G.btcPrice=1000;
+            G.btcHistory.push(G.btcPrice);
+            if (G.btcHistory.length>20) G.btcHistory.shift();
+            drawChart(); updateUI();
+        }
+        setInterval(updateBtcPrice, 4000);
+        updateBtcPrice();
+
+        setInterval(function() {
+            if (!gameStarted) return;
+            G.bills += G.billsPerSec * (1 + G.rebirthBonus/100);
+            updateUI();
+        }, 1000);
+
+        function switchTab(id) {
+            ['factory','upgrades','sell','crypto','rebirth'].forEach(function(t) {
+                document.getElementById(t+'Content').style.display = 'none';
+                document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.remove('active');
+            });
+            document.getElementById(id+'Content').style.display = 'block';
+            document.getElementById('tab'+id.charAt(0).toUpperCase()+id.slice(1)).classList.add('active');
+            if (id==='crypto') setTimeout(drawChart, 100);
+        }
+        ['tabFactory','tabUpgrades','tabSell','tabCrypto','tabRebirth'].forEach(function(id) {
+            handleTap(document.getElementById(id), function() {
+                switchTab(id.replace('tab','').toLowerCase());
+            });
+        });
+
+        function resetGame() {
+            if (!confirm('Полный сброс всего, включая перерождения?')) return;
+            G = {
+                bills:0,money:0,clickPower:100,billsPerSec:0,
+                upgrades:[0,0],baseUpgCost:[1600,8000],
+                sellUpgLevel:0,sellUpgBaseCost:30000,billPrice:100,
+                btc:0,btcPrice:100000,btcUpgLevel:0,btcUpgBaseCost:50000,btcHistory:[100000],
+                rebirths:0,rebirthBonus:0,
+                noUpgradeRebirthCheck: false,
+                achievementsUnlocked: {
+                    rebirth_1: false, rebirth_5: false, rebirth_10: false,
+                    rebirth_20: false, rebirth_50: false, rebirth_100: false,
+                    earn_1M_money: false, earn_1M_bills: false,
+                    buy_100_btc_at_once: false, no_upgrade_rebirth: false,
+                    earn_1B_no_rebirth: false
+                }
+            };
+            save(); updateUI(); drawChart();
+        }
+        handleTap(document.getElementById('resetBtn'), resetGame);
+    </script>
+</body>
+</html>
